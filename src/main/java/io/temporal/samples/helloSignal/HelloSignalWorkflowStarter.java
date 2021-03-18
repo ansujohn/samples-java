@@ -14,7 +14,7 @@ public class HelloSignalWorkflowStarter {
 
     // In a real application use a business ID like customer ID or order ID
     // Generate random int value from min to max
-    int max = 30, min = 1;
+    int max = 60, min = 31;
     int random_int = (int) (Math.random() * (max - min + 1) + min);
 
     String workflowId = "signal-workflow-" + random_int;
@@ -33,7 +33,7 @@ public class HelloSignalWorkflowStarter {
     WorkflowClient.start(workflow::start);
     workflow.signalChange("INIT");
     workflow.signalChange("STATE1");
-    workflow.signalChange("STATE2");
+    // workflow.signalChange("STATE2");
     // workflow.exit(); // sends exit signal
 
     System.exit(0);

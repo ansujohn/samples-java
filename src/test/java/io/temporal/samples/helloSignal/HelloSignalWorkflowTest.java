@@ -68,10 +68,10 @@ public class HelloSignalWorkflowTest {
 
     // Start workflow
     WorkflowClient.start(workflow::start);
-    testEnv.sleep(Duration.ofSeconds(5));
 
     workflow.signalChange("INIT");
     workflow.signalChange("STATE1");
+    testEnv.sleep(Duration.ofSeconds(20));
 
     verify(greetingActivity, times(2)).composeGreeting(any());
   }

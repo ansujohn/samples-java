@@ -22,7 +22,8 @@ public class HelloSignalWorker {
     // This Worker hosts both Workflow and Activity implementations.
     Worker worker = factory.newWorker(TaskQueues.HELLO_SIGNAL_TASK_QUEUE);
     // Workflows are stateful. So you need a type to create instances.
-    worker.registerWorkflowImplementationTypes(HelloSignalWorkflowImpl.class);
+    worker.registerWorkflowImplementationTypes(
+        HelloSignalWorkflowImpl.class, CleanupWorkflowImpl.class);
     // Activities are stateless and thread safe. So a shared instance is used.
     worker.registerActivitiesImplementations(new GreetingActivityImpl());
     // Start polling the Task Queue.
