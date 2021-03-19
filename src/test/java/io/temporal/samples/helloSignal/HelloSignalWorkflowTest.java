@@ -119,6 +119,6 @@ public class HelloSignalWorkflowTest {
     workflow.signalChange("STATE1");
     testEnv.sleep(Duration.ofSeconds(5));
     client.newUntypedWorkflowStub(wfId.toString(), empty(), empty()).cancel();
-    verify(greetingActivity, times(4)).composeGreeting(any());
+    verify(greetingActivity, times(2)).composeGreeting(any());
   }
 }
