@@ -33,8 +33,8 @@ public class HelloSignalWorkflowStarter {
     WorkflowClient.start(workflow::start);
     workflow.signalChange("INIT");
     workflow.signalChange("STATE1");
-    // workflow.signalChange("STATE2");
-    // workflow.exit(); // sends exit signal
+    workflow.signalChange("STATE2");
+    workflow.exit(); // sends exit signal
 
     System.exit(0);
   }

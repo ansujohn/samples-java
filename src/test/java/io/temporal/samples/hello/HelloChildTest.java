@@ -89,7 +89,6 @@ public class HelloChildTest {
   }
 
   @Test
-  // @Ignore // TODO: Find out how to deal with cglib based mocks
   public void testMockedChild() {
     worker.registerWorkflowImplementationTypes(GreetingWorkflowImpl.class);
     // As new mock is created on each workflow task the only last one is useful to verify calls.

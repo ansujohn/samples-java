@@ -117,8 +117,9 @@ public class HelloSignalWorkflowTest {
 
     workflow.signalChange("INIT");
     workflow.signalChange("STATE1");
-    testEnv.sleep(Duration.ofSeconds(5));
+    testEnv.sleep(Duration.ofSeconds(2));
     client.newUntypedWorkflowStub(wfId.toString(), empty(), empty()).cancel();
+    testEnv.sleep(Duration.ofSeconds(2));
     verify(greetingActivity, times(2)).composeGreeting(any());
     CleanupWorkflow cleanupWorkflow = lastChildMock.get();
     verify(cleanupWorkflow, times(1)).cleanUp(anyList());
