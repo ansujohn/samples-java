@@ -37,7 +37,7 @@ public class HelloSignalWorkflowImpl implements HelloSignalWorkflow {
     greetings.add(greetingActivity.composeGreeting(INIT));
     System.out.println("Processed signals: " + greetings.toString());
 
-    CancellationScope cancelScope =
+    CancellationScope mainScope =
         Workflow.newCancellationScope(
             () -> {
               String STATE1 = "STATE1";
@@ -59,13 +59,13 @@ public class HelloSignalWorkflowImpl implements HelloSignalWorkflow {
               System.out.println("Processed signals: " + greetings.toString());
             });
     try {
-      cancelScope.run();
+      mainScope.run();
     } catch (Exception e) {
       System.out.println("CancelScope - cancel");
-      cancelScope.cancel();
+      mainScope.cancel();
 
       System.out.println("Workflow is Cancelled");
-      CancellationScope detached =
+      CancellationScope cleanupScope =
           Workflow.newDetachedCancellationScope(
               () -> {
                 // clean up logic
@@ -79,10 +79,9 @@ public class HelloSignalWorkflowImpl implements HelloSignalWorkflow {
                         signals);
                 promise.get();
               });
-      detached.run();
+      cleanupScope.run();
       System.out.println("CancelScope - cancel - done");
     }
-
   }
 
   @Override

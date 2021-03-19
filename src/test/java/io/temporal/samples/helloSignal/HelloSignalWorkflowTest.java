@@ -1,5 +1,6 @@
 package io.temporal.samples.helloSignal;
 
+import static java.util.Optional.empty;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.verify;
@@ -9,6 +10,8 @@ import io.temporal.client.WorkflowOptions;
 import io.temporal.testing.TestWorkflowEnvironment;
 import io.temporal.worker.Worker;
 import java.time.Duration;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -71,8 +74,51 @@ public class HelloSignalWorkflowTest {
 
     workflow.signalChange("INIT");
     workflow.signalChange("STATE1");
-    testEnv.sleep(Duration.ofSeconds(20));
+    workflow.signalChange("STATE2");
+    workflow.signalChange("STATE3");
+    testEnv.sleep(Duration.ofSeconds(2));
 
-    verify(greetingActivity, times(2)).composeGreeting(any());
+    verify(greetingActivity, times(4)).composeGreeting(any());
+  }
+
+  @Test
+  public void testCancellation() {
+
+    GreetingActivity greetingActivity = mock(GreetingActivity.class);
+    when(greetingActivity.composeGreeting(anyString())).thenReturn("Hello Test");
+    worker.registerActivitiesImplementations(greetingActivity);
+
+    // As new mock is created on each workflow task the only last one is useful to verify calls.
+    AtomicReference<CleanupWorkflow> lastChildMock = new AtomicReference<>();
+    // Factory is called to create a new workflow object on each workflow task.
+    worker.addWorkflowImplementationFactory(
+        CleanupWorkflow.class,
+        () -> {
+          CleanupWorkflow child = mock(CleanupWorkflow.class);
+          lastChildMock.set(child);
+          return child;
+        });
+
+    testEnv.start();
+
+    UUID wfId = UUID.randomUUID();
+    // Get a workflow stub using the same task queue the worker uses.
+    WorkflowOptions workflowOptions =
+        WorkflowOptions.newBuilder()
+            .setWorkflowId(wfId.toString())
+            .setTaskQueue(TEST_QUEUE)
+            .setWorkflowTaskTimeout(Duration.ofSeconds(20))
+            .build();
+    HelloSignalWorkflow workflow =
+        client.newWorkflowStub(HelloSignalWorkflow.class, workflowOptions);
+
+    // Start workflow
+    WorkflowClient.start(workflow::start);
+
+    workflow.signalChange("INIT");
+    workflow.signalChange("STATE1");
+    testEnv.sleep(Duration.ofSeconds(5));
+    client.newUntypedWorkflowStub(wfId.toString(), empty(), empty()).cancel();
+    verify(greetingActivity, times(4)).composeGreeting(any());
   }
 }
